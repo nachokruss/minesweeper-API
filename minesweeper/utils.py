@@ -20,9 +20,9 @@ def add_mines(game):
 
 def calculate_cell_value(x, y, game):
     value = 0
-    for adjacent_x in range(x - 1, x + 1):
-        for adjacent_y in range(y - 1, y + 1):
-            if is_in_range(adjacent_x, adjacent_y, game) and game['board'][adjacent_x][adjacent_y].get('has_mine'):
+    for adjacent_x in range(x - 1, x + 2):
+        for adjacent_y in range(y - 1, y + 2):
+            if is_in_range(game, adjacent_x, adjacent_y) and game['board'][adjacent_x][adjacent_y].get('has_mine'):
                 value = value + 1
     return value
 
@@ -35,5 +35,38 @@ def calculate_value(game):
                 board[x][y]['value'] = calculate_cell_value(x, y, game)
 
 
-def is_in_range(x, y, game):
-    return 0 < x < game['width'] and 0 < y < game['height']
+def is_in_range(game, x, y):
+    return 0 <= x < game['width'] and 0 <= y < game['height']
+
+
+def check_cell(game, x, y):
+    if not is_in_range(game, x, y):
+        return
+
+    if not game['status'] == 'playing':
+        return
+
+    board = game['board']
+
+    if board[x][y].get('flagged'):
+        return
+
+    board[x][y]['revealed'] = True
+    if board[x][y].get('has_mine'):
+        board[x][y]['exploded'] = True
+        game['status'] = 'ended'
+
+
+def flag_cell(game, x, y):
+    if not is_in_range(game, x, y):
+        return
+
+    if not game['status'] == 'playing':
+        return
+
+    board = game['board']
+
+    if board[x][y].get('revealed'):
+        return
+
+    board[x][y]['flagged'] = True

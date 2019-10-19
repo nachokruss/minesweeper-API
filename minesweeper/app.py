@@ -2,7 +2,7 @@ import pymongo
 from flask import Flask, abort, request
 from config import get_config
 from bson.json_util import dumps, ObjectId
-from utils import generate_board, add_mines, calculate_value
+from utils import generate_board, add_mines, calculate_value, check_cell, flag_cell
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -22,6 +22,7 @@ def post_game():
         'width': params.get('width', 10),
         'height': params.get('height', 10),
         'mines': params.get('mines', 10),
+        'status': 'playing'
     }
     generate_board(new_game)
     add_mines(new_game)
@@ -35,6 +36,26 @@ def get_game(game_id):
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
         abort(404)
+    return dumps(game)
+
+
+@app.route('/game/<game_id>/check/<x>/<y>')
+def check(game_id, x, y):
+    game = games_col.find_one({'_id': ObjectId(game_id)})
+    if not game:
+        abort(404)
+    check_cell(game, int(x), int(y))
+    games_col.replace_one({'_id': ObjectId(game_id)}, game)
+    return dumps(game)
+
+
+@app.route('/game/<game_id>/flag/<x>/<y>')
+def flag(game_id, x, y):
+    game = games_col.find_one({'_id': ObjectId(game_id)})
+    if not game:
+        abort(404)
+    flag_cell(game, int(x), int(y))
+    games_col.replace_one({'_id': ObjectId(game_id)}, game)
     return dumps(game)
 
 
