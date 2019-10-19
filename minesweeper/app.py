@@ -3,11 +3,15 @@ from flask import Flask, abort, request
 from config import get_config
 from bson.json_util import dumps, ObjectId
 from utils import generate_board, add_mines, calculate_value, check_cell, flag_cell, create_view
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__, instance_relative_config=True)
 
 # Load the default configuration
 app.config.from_object(get_config())
+
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Init mongodb
 mongo_client = pymongo.MongoClient(app.config.get("MONGO_DB_URL"))
@@ -16,6 +20,7 @@ games_col = mongo_db["games"]
 
 
 @app.route('/game', methods=['POST'])
+@cross_origin()
 def post_game():
     params = request.json
     new_game = {
@@ -32,6 +37,7 @@ def post_game():
 
 
 @app.route('/game/<game_id>')
+@cross_origin()
 def get_game(game_id):
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
@@ -40,6 +46,7 @@ def get_game(game_id):
 
 
 @app.route('/game/<game_id>/check/<x>/<y>')
+@cross_origin()
 def check(game_id, x, y):
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
@@ -50,6 +57,7 @@ def check(game_id, x, y):
 
 
 @app.route('/game/<game_id>/flag/<x>/<y>')
+@cross_origin()
 def flag(game_id, x, y):
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
