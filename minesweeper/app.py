@@ -2,7 +2,7 @@ import pymongo
 from flask import Flask, abort, request
 from config import get_config
 from bson.json_util import dumps, ObjectId
-from utils import generate_board, add_mines
+from utils import generate_board, add_mines, calculate_value
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -25,6 +25,7 @@ def post_game():
     }
     generate_board(new_game)
     add_mines(new_game)
+    calculate_value(new_game)
     games_col.insert_one(new_game)
     return dumps(new_game)
 
