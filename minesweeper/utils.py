@@ -50,7 +50,7 @@ def reveal_cell(game, x, y):
                     and game['board'][adjacent_x][adjacent_y].get('value') == 0 \
                     and not game['board'][adjacent_x][adjacent_y].get('revealed') \
                     and not game['board'][adjacent_x][adjacent_y].get('has_mine') \
-                    and not game['board'][x][y].get('flagged'):
+                    and not game['board'][adjacent_x][adjacent_y].get('flagged'):
                 reveal_cell(game, adjacent_x, adjacent_y)
 
 
