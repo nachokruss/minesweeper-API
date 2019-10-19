@@ -39,7 +39,11 @@ def is_in_range(game, x, y):
     return 0 <= x < game['width'] and 0 <= y < game['height']
 
 
-def reveal_cell(game, x, y):
+def auto_reveal_cell(game, x, y):
+    """
+    Reveals the cell at the given coordinates.
+    When a cell with no adjacent mines is revealed, all adjacent squares will be revealed (and repeat).
+    """
 
     game['board'][x][y]['revealed'] = True
 
@@ -47,11 +51,16 @@ def reveal_cell(game, x, y):
     for adjacent_x in range(x - 1, x + 2):
         for adjacent_y in range(y - 1, y + 2):
             if is_in_range(game, adjacent_x, adjacent_y)\
-                    and game['board'][adjacent_x][adjacent_y].get('value') == 0 \
                     and not game['board'][adjacent_x][adjacent_y].get('revealed') \
                     and not game['board'][adjacent_x][adjacent_y].get('has_mine') \
                     and not game['board'][adjacent_x][adjacent_y].get('flagged'):
-                reveal_cell(game, adjacent_x, adjacent_y)
+
+                if game['board'][adjacent_x][adjacent_y].get('value') == 0:
+                    # No adjacent mines, reveal it and its adjacent cells.
+                    auto_reveal_cell(game, adjacent_x, adjacent_y)
+                else:
+                    # Adjacent mines, reveal it only
+                    game['board'][adjacent_x][adjacent_y]['revealed'] = True
 
 
 def check_cell(game, x, y):
@@ -66,11 +75,23 @@ def check_cell(game, x, y):
     if board[x][y].get('flagged'):
         return
 
-    reveal_cell(game, x, y)
+    auto_reveal_cell(game, x, y)
 
     if board[x][y].get('has_mine'):
         board[x][y]['exploded'] = True
-        game['status'] = 'ended'
+        game['status'] = 'lost'
+    elif check_win(game):
+        game['status'] = 'win'
+
+
+def check_win(game):
+    for x in range(game['width']):
+        for y in range(game['height']):
+            cell = game['board'][x][y]
+            if not cell.get('has_mine') and not cell.get('revealed'):
+                return False
+
+    return True
 
 
 def flag_cell(game, x, y):
@@ -92,11 +113,9 @@ def create_cell_view(game, x, y):
     status = game['status']
     cell = game['board'][x][y]
 
-    if status == 'playing' and cell.get('revealed'):
+    if (status == 'playing' and cell.get('revealed')) or not status == 'playing':
         return cell
-    elif status == 'ended':
-        return cell
-    elif cell.get('flagged'):
+    elif status == 'playing' and cell.get('flagged'):
         return {
             'flagged': True
         }
