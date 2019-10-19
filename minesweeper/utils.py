@@ -70,3 +70,25 @@ def flag_cell(game, x, y):
         return
 
     board[x][y]['flagged'] = True
+
+
+def create_cell_view(game, x, y):
+    status = game['status']
+    cell = game['board'][x][y]
+
+    if status == 'playing' and cell.get('revealed'):
+        return cell
+    elif status == 'ended':
+        return cell
+
+    return {
+        'revealed': False
+    }
+
+
+def create_view(game):
+    return {
+        'id': str(game['_id']),
+        'status': game['status'],
+        'board': [[create_cell_view(game, x, y) for x in range(game['width']) for y in range(game['height'])]]
+    }
