@@ -39,6 +39,20 @@ def is_in_range(game, x, y):
     return 0 <= x < game['width'] and 0 <= y < game['height']
 
 
+def reveal_cell(game, x, y):
+
+    game['board'][x][y]['revealed'] = True
+
+    # auto reveal adjacent cells
+    for adjacent_x in range(x - 1, x + 2):
+        for adjacent_y in range(y - 1, y + 2):
+            if is_in_range(game, adjacent_x, adjacent_y)\
+                    and game['board'][adjacent_x][adjacent_y].get('value') == 0 \
+                    and not game['board'][adjacent_x][adjacent_y].get('revealed') \
+                    and not game['board'][adjacent_x][adjacent_y].get('has_mine'):
+                reveal_cell(game, adjacent_x, adjacent_y)
+
+
 def check_cell(game, x, y):
     if not is_in_range(game, x, y):
         return
@@ -51,7 +65,8 @@ def check_cell(game, x, y):
     if board[x][y].get('flagged'):
         return
 
-    board[x][y]['revealed'] = True
+    reveal_cell(game, x, y)
+
     if board[x][y].get('has_mine'):
         board[x][y]['exploded'] = True
         game['status'] = 'ended'
@@ -90,5 +105,5 @@ def create_view(game):
     return {
         'id': str(game['_id']),
         'status': game['status'],
-        'board': [[create_cell_view(game, x, y) for x in range(game['width']) for y in range(game['height'])]]
+        'board': [[create_cell_view(game, x, y) for y in range(game['width'])] for x in range(game['height'])]
     }
