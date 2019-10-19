@@ -2,7 +2,7 @@ import random
 
 
 def generate_board(game):
-    board = [[dict() for _x in range(game['width'])] for _y in range(game['height'])]
+    board = [[dict() for _y in range(game['height'])] for _y in range(game['width'])]
     game['board'] = board
 
 
@@ -49,7 +49,8 @@ def reveal_cell(game, x, y):
             if is_in_range(game, adjacent_x, adjacent_y)\
                     and game['board'][adjacent_x][adjacent_y].get('value') == 0 \
                     and not game['board'][adjacent_x][adjacent_y].get('revealed') \
-                    and not game['board'][adjacent_x][adjacent_y].get('has_mine'):
+                    and not game['board'][adjacent_x][adjacent_y].get('has_mine') \
+                    and not game['board'][x][y].get('flagged'):
                 reveal_cell(game, adjacent_x, adjacent_y)
 
 
@@ -109,5 +110,5 @@ def create_view(game):
     return {
         'id': str(game['_id']),
         'status': game['status'],
-        'board': [[create_cell_view(game, x, y) for y in range(game['width'])] for x in range(game['height'])]
+        'board': [[create_cell_view(game, x, y) for y in range(game['height'])] for x in range(game['width'])]
     }
