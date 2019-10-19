@@ -84,7 +84,7 @@ def flag_cell(game, x, y):
     if board[x][y].get('revealed'):
         return
 
-    board[x][y]['flagged'] = True
+    board[x][y]['flagged'] = not board[x][y].get('flagged', False)
 
 
 def create_cell_view(game, x, y):
@@ -95,6 +95,10 @@ def create_cell_view(game, x, y):
         return cell
     elif status == 'ended':
         return cell
+    elif cell.get('flagged'):
+        return {
+            'flagged': True
+        }
 
     return {
         'revealed': False
