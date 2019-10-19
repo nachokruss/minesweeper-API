@@ -2,7 +2,7 @@ import pymongo
 from flask import Flask, abort, request
 from config import get_config
 from bson.json_util import dumps, ObjectId
-from utils import generate_board, add_mines, calculate_value, check_cell, flag_cell
+from utils import generate_board, add_mines, calculate_value, check_cell, flag_cell, create_view
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -28,7 +28,7 @@ def post_game():
     add_mines(new_game)
     calculate_value(new_game)
     games_col.insert_one(new_game)
-    return dumps(new_game)
+    return dumps(create_view(new_game))
 
 
 @app.route('/game/<game_id>')
@@ -36,7 +36,7 @@ def get_game(game_id):
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
         abort(404)
-    return dumps(game)
+    return dumps(create_view(game))
 
 
 @app.route('/game/<game_id>/check/<x>/<y>')
@@ -46,7 +46,7 @@ def check(game_id, x, y):
         abort(404)
     check_cell(game, int(x), int(y))
     games_col.replace_one({'_id': ObjectId(game_id)}, game)
-    return dumps(game)
+    return dumps(create_view(game))
 
 
 @app.route('/game/<game_id>/flag/<x>/<y>')
@@ -56,7 +56,7 @@ def flag(game_id, x, y):
         abort(404)
     flag_cell(game, int(x), int(y))
     games_col.replace_one({'_id': ObjectId(game_id)}, game)
-    return dumps(game)
+    return dumps(create_view(game))
 
 
 if __name__ == '__main__':
