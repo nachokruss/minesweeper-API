@@ -5,6 +5,7 @@ from config import get_config
 from bson.json_util import dumps, ObjectId
 from utils import generate_board, add_mines, calculate_value, check_cell, flag_cell, create_view
 from flask_cors import CORS, cross_origin
+from flask_swagger import swagger
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -24,9 +25,75 @@ DEFAULT_COLS = 10
 DEFAULT_MINES = 10
 
 
+@app.route("/spec")
+@cross_origin()
+def spec():
+    swag = swagger(app)
+    swag['info']['version'] = "1.0"
+    swag['info']['title'] = "Minesweeper API"
+    return jsonify(swag)
+
+
 @app.route('/game', methods=['POST'])
 @cross_origin()
 def post_game():
+    """
+    Create a new game
+    ---
+    tags:
+      - game
+    definitions:
+      - schema:
+          id: Game
+          properties:
+            id:
+             type: string
+             description: Unique identifier of the game
+            status:
+             type: string
+             description: Any of playing, win or lost.
+            board:
+             type: array
+             items:
+              type: object
+              properties:
+                has_mine:
+                  type: boolean
+                  description: Indicates if there is a mine in this cell
+                exploded:
+                  type: boolean
+                  description: Indicates if there is this cell has exploded.
+                revealed:
+                  type: boolean
+                  description: Indicates if there is this cell has revealed.
+                flagged:
+                  type: boolean
+                  description: Indicates if there is this cell has been flagged.
+                value:
+                  type: integer
+                  description: After its revealed, it indicates the number of adjacent mines.
+             description: 2D array of the game cells
+    parameters:
+      - in: body
+        name: body
+        schema:
+          id: GameRequest
+          properties:
+            rows:
+              type: integer
+              description: Number of rows
+            cols:
+              type: integer
+              description: Number of cols
+            mines:
+              type: integer
+              description: Number of mines (not to exceed 50% ratio)
+    responses:
+      200:
+        description: Game created
+        schema:
+          $ref: '#/definitions/Game'
+    """
     params = request.json
     check_create_params(params)
     new_game = {
@@ -46,6 +113,23 @@ def post_game():
 @app.route('/game/<game_id>')
 @cross_origin()
 def get_game(game_id):
+    """
+    Fetch a Game
+    ---
+    tags:
+      - game
+    parameters:
+      - in: path
+        name: game_id
+        description: Id of the game to fetch.
+        required: true
+        type: string
+    responses:
+      200:
+        description: Game
+        schema:
+          $ref: '#/definitions/Game'
+    """
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
         abort(404)
@@ -55,6 +139,35 @@ def get_game(game_id):
 @app.route('/game/<game_id>/check/<x>/<y>')
 @cross_origin()
 def check(game_id, x, y):
+    """
+    Try to reveal a cell in a game.
+    If the cell is flagged this operation is ignored.
+    If it has a mine the cell will explode.
+    ---
+    tags:
+      - game
+    parameters:
+      - in: path
+        name: game_id
+        description: Id of the game to check a cell in.
+        required: true
+        type: string
+      - in: path
+        name: x
+        description: X coordinate of the cell to check.
+        required: true
+        type: integer
+      - in: path
+        name: y
+        description: Y coordinate of the cell to check.
+        required: true
+        type: integer
+    responses:
+      200:
+        description: Game
+        schema:
+          $ref: '#/definitions/Game'
+    """
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
         abort(404)
@@ -66,6 +179,33 @@ def check(game_id, x, y):
 @app.route('/game/<game_id>/flag/<x>/<y>')
 @cross_origin()
 def flag(game_id, x, y):
+    """
+    Place a flag in a cell in a game.
+    ---
+    tags:
+      - game
+    parameters:
+      - in: path
+        name: game_id
+        description: Id of the game to check a cell in.
+        required: true
+        type: string
+      - in: path
+        name: x
+        description: X coordinate of the cell to place the flag.
+        required: true
+        type: integer
+      - in: path
+        name: y
+        description: Y coordinate of the cell to place the flag.
+        required: true
+        type: integer
+    responses:
+      200:
+        description: Game
+        schema:
+          $ref: '#/definitions/Game'
+    """
     game = games_col.find_one({'_id': ObjectId(game_id)})
     if not game:
         abort(404)
