@@ -6,6 +6,8 @@ from bson.json_util import dumps, ObjectId
 from utils import generate_board, add_mines, calculate_value, check_cell, flag_cell, create_view
 from flask_cors import CORS, cross_origin
 from flask_swagger import swagger
+from flask_swagger_ui import get_swaggerui_blueprint
+
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -23,6 +25,18 @@ games_col = mongo_db["games"]
 DEFAULT_ROWS = 10
 DEFAULT_COLS = 10
 DEFAULT_MINES = 10
+
+# Swagger setup
+SWAGGER_URL = '/spec/ui'
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    '/spec',
+    config={
+        'app_name': "Minesweeper",
+        'version': '1.0'
+    },
+)
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 
 @app.route("/spec")
