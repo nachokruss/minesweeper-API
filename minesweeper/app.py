@@ -230,19 +230,19 @@ def flag(game_id, x, y):
 
 def check_create_params(params):
     if params and params.get('rows') and params.get('rows') < 1:
-        abort(status_code=500, message='Rows should be more than 1')
+        abort(status_code=400, message='Rows should be more than 1')
 
     if params and params.get('cels') and params.get('cels') < 1:
-        abort(status_code=500, message='Cels should be more than 1')
+        abort(status_code=400, message='Cels should be more than 1')
 
     if params and params.get('mines') and params.get('mines') < 1:
-        abort(status_code=500, message='Mines should be more than 1')
+        abort(status_code=400, message='Mines should be more than 1')
 
 
 def validate_game(game):
     number_of_cels = game['rows'] * game['cols']
     if game['mines'] > number_of_cels / 2:
-        abort(status_code=500, message='Mines ratio should be less than 50%')
+        abort(status_code=400, message='Mines ratio should be less than 50%')
 
 
 def abort(status_code, message='Unexpected Error'):
