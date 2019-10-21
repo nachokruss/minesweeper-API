@@ -35,4 +35,4 @@ pytest
 
 # Note:
  - React UI available in:
-https://github.com/nachokruss/minesweeper-API
+https://github.com/nachokruss/minesweeper-UI
