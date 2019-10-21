@@ -32,3 +32,7 @@ Swagger UI: 127.0.0.1:8080/spec/ui
 pip install pytest
 pytest
 ```
+
+# Note:
+ - React UI available in:
+https://github.com/nachokruss/minesweeper-API
