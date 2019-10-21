@@ -1,8 +1,11 @@
 # minesweeper-API
 minesweeper-API
 
-# install pip, pyenv and pyenv-virtualenv
-
+# Install prerequisites
+ - pip
+ - pyenv
+ - pyenv-virtualenv
+ - mongodb
 
 # Setting up
 Create a virtual environment and activate it.
@@ -24,7 +27,7 @@ Minesweeper app should be running on 127.0.0.1:8080
 Swagger specs: 127.0.0.1:8080/spec
 Swagger UI: 127.0.0.1:8080/spec/ui
 
-# Running the test
+# Running the tests
 ```
 pip install pytest
 pytest
